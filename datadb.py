@@ -77,8 +77,11 @@ class Database:
     @staticmethod
     def split_buy_sell(df):
         df["وضعیت"] = np.where(df["نام نماد"].str.contains("اختيارخ"), 'خرید', 'فروش')
-        df.insert(5, "وضعیت", df.pop("وضعیت"))
         print("---> split buy_sell <---")
+        df["دسته"] = df["نام نماد"].str.extract(r"\s(.+)$")
+        print("---> split nmad <---")
+        df.insert(5, "وضعیت", df.pop("وضعیت"))     
+        # df.insert(8, "دسته", df.pop("دسته"))  
         return df
 
 
@@ -116,7 +119,7 @@ class Database:
         try:
             # df.to_excel(r"../tsetmc/df_ektiar.xlsx") macOS
             
-            df.to_excel(r"E:\code\data_vizi\tsetmc_dash\tsetmc\df_ektiar.xlsx") # win
+            df.to_excel(r"E:\code\data_vizi\tsetmc_dash\tsetmc\App\Data\df_ektiar.xlsx") # win
             print(f"*---> {datetime.now()}: Data Save to excel successfully <---*")
         except Exception as e:
             print(f"no save Error!! Error Details: {e}")

@@ -12,7 +12,7 @@ from dash import html, dcc, callback, Input, Output
 
 
 df = pd.read_excel(
-    r"E:\code\data_vizi\tsetmc_dash\tsetmc\df_ektiar.xlsx")
+    r"E:\code\data_vizi\tsetmc_dash\tsetmc\App\Data\df_ektiar.xlsx")
 
 # app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
 
@@ -52,7 +52,7 @@ def refresh_table(n):
     if n is None:
         raise dash.exceptions.PreventUpdate
     Database.Database_Tsetmc()
-    df = pd.read_excel(r"E:\code\data_vizi\tsetmc_dash\tsetmc\df_ektiar.xlsx")
+    df = pd.read_excel(r"E:\code\data_vizi\tsetmc_dash\tsetmc\App\Data\df_ektiar.xlsx")
     return df.to_dict("records")
 
 # if __name__ == "__main__":

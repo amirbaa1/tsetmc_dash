@@ -68,7 +68,7 @@ class Database:
         df["تاریخ"] = df_split_values.str[2]
         df.insert(4, "نام نماد", df.pop("نام نماد"))
         df.insert(6, "مقدار", df.pop("مقدار"))
-        df.insert(7, "تاریخ", df.pop("تاریخ"))
+        df.insert(8, "تاریخ", df.pop("تاریخ"))
         print("---> clean namd <---")
         df = df[df["نام نماد"].apply(lambda x: "اختيار" in x)].reset_index(drop=True)
         print("---> split ektiar <---")
@@ -79,6 +79,10 @@ class Database:
         df["وضعیت"] = np.where(df["نام نماد"].str.contains("اختيارخ"), 'خرید', 'فروش')
         df.insert(5, "وضعیت", df.pop("وضعیت"))
         print("---> split buy_sell <---")
+
+        df["دسته"] = df["نام نماد"].str.extract(r"\s(.+)$")
+        df.insert(4, "دسته", df.pop("دسته"))  
+        print("---> split nmad <---")
         return df
 
 
@@ -116,7 +120,7 @@ class Database:
         try:
             # df.to_excel(r"../tsetmc/df_ektiar.xlsx") macOS
             
-            df.to_excel(r"E:\code\data_vizi\tsetmc_dash\tsetmc\df_ektiar.xlsx") # win
+            df.to_excel(r"E:\code\data_vizi\tsetmc_dash\tsetmc\App\Data\df_ektiar.xlsx") # win
             print(f"*---> {datetime.now()}: Data Save to excel successfully <---*")
         except Exception as e:
             print(f"no save Error!! Error Details: {e}")
