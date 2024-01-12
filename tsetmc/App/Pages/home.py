@@ -230,7 +230,8 @@ def generate_pie_chart(selected_status, selected_symbols):
 def update_pie_chart(selected_status, selected_symbols):
     return generate_pie_chart(selected_status, selected_symbols)
 
-#TODO : bug
+
+# pie2 namad megdar v mamaele
 @callback(
     Output("pie_fig_2", "figure"),
     [Input("symbols", "value"),
@@ -241,14 +242,20 @@ def generate_pie_2_chart(selected_symbols, selector):
         selected_symbols = [selected_symbols]
 
     bar_df = df[(df["دسته"].isin(selected_symbols))]
+    # grouped_df_sum = bar_df.groupby(['وضعیت', 'دسته']).agg(
+    #     {"مقدار": "sum"}).reset_index()
+
     grouped_df_sum = bar_df.groupby(['وضعیت', 'دسته']).agg(
-        {"مقدار": "sum"}).reset_index()
+        {"مقدار": "mean"}).reset_index()
 
     grouped_df_transaction = bar_df.groupby(['وضعیت', 'دسته']).agg(
         {"معامله": "sum"}).reset_index()
 
     if selector == 'مقدار':
-        fig = px.pie(data_frame=grouped_df_sum, names='دسته', hole=0.6)
+        # fig = px.pie(data_frame=grouped_df_sum, names='دسته', hole=0.6)
+        fig = px.pie(data_frame=grouped_df_sum, names='دسته',
+                     values='مقدار', custom_data=['مقدار'], hole=0.6)
+
         fig.update_layout(
             title='مقدار نماد ها',
             title_font=dict(size=20)
@@ -256,13 +263,16 @@ def generate_pie_2_chart(selected_symbols, selector):
         return fig
 
     elif selector == 'معامله':
-        fig = px.pie(data_frame=grouped_df_transaction, names='دسته', hole=0.6)
+        # fig = px.pie(data_frame=grouped_df_transaction, names='دسته', hole=0.6)
+        fig = px.pie(data_frame=grouped_df_transaction, names='دسته',
+                     values='معامله', custom_data=['معامله'], hole=0.6)
+
         fig.update_layout(
             title='معامله نماد ها',
             title_font=dict(size=20)
         )
-        return fig 
- 
+        return fig
+
 
 # pig sell and buy
 
