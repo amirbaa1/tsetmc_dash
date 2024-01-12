@@ -9,10 +9,16 @@ from dash import Dash, dash_table
 from Services.datadb import Database
 import plotly.express as px
 from dash import html, dcc, callback, Input, Output
+import os
+
+# df = pd.read_excel(
+#     r"\\tsetmc\App\Data\df_ektiar.xlsx")
 
 
-df = pd.read_excel(
-    r"E:\code\data_vizi\tsetmc_dash\tsetmc\App\Data\df_ektiar.xlsx")
+directory = os.path.dirname(os.path.abspath(__file__))
+file_path = os.path.join(directory, "..", "Data", "df_ektiar.xlsx")
+
+df = pd.read_excel(file_path)
 
 # app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
 
@@ -23,7 +29,7 @@ table_div = dbc.Table(
     [
         html.H1("Data tsetmc"),
         dbc.Button("Refresh", id="refresh-btn", color="primary",
-                   className="me-1"), 
+                   className="me-1"),
         html.Div(id="log-output"),
         dash_table.DataTable(
             id="table",
@@ -51,8 +57,14 @@ layout = html.Div([table_div])
 def refresh_table(n):
     if n is None:
         raise dash.exceptions.PreventUpdate
+
     Database.Database_Tsetmc()
-    df = pd.read_excel(r"E:\code\data_vizi\tsetmc_dash\tsetmc\App\Data\df_ektiar.xlsx")
+    directory = os.path.dirname(os.path.abspath(__file__))
+    file_path = os.path.join(directory, "..", "Data", "df_ektiar.xlsx")
+
+    df = pd.read_excel(file_path)
+
+    # df = pd.read_excel(r"...\tsetmc\app\Data\df_ektiar.xlsx")
     return df.to_dict("records")
 
 # if __name__ == "__main__":

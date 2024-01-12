@@ -3,6 +3,7 @@ import pandas as pd
 import numpy as np
 from datetime import datetime
 from requests.exceptions import RequestException
+import os
 
 
 class Database:
@@ -70,21 +71,22 @@ class Database:
         df.insert(6, "مقدار", df.pop("مقدار"))
         df.insert(8, "تاریخ", df.pop("تاریخ"))
         print("---> clean namd <---")
-        df = df[df["نام نماد"].apply(lambda x: "اختيار" in x)].reset_index(drop=True)
+        df = df[df["نام نماد"].apply(
+            lambda x: "اختيار" in x)].reset_index(drop=True)
         print("---> split ektiar <---")
         return df
 
     @staticmethod
     def split_buy_sell(df):
-        df["وضعیت"] = np.where(df["نام نماد"].str.contains("اختيارخ"), 'خرید', 'فروش')
+        df["وضعیت"] = np.where(
+            df["نام نماد"].str.contains("اختيارخ"), 'خرید', 'فروش')
         df.insert(5, "وضعیت", df.pop("وضعیت"))
         print("---> split buy_sell <---")
 
         df["دسته"] = df["نام نماد"].str.extract(r"\s(.+)$")
-        df.insert(4, "دسته", df.pop("دسته"))  
+        df.insert(4, "دسته", df.pop("دسته"))
         print("---> split nmad <---")
         return df
-
 
     @staticmethod
     def clean_time(time):
@@ -98,30 +100,33 @@ class Database:
             else:
                 return time
         except Exception as e:
-            print("Error clena_time : ",e)
-        
+            print("Error clena_time : ", e)
+
     # def clena_time2(time):
     #     try:
     #         time_split = time.split('/')
 
-        
         except Exception as e:
             print(e)
-
 
     @staticmethod
     def apply_time(df):
         df['تاریخ'] = df['تاریخ'].apply(lambda time: Database.clean_time(time))
         return df
 
-
     @staticmethod
     def SaveToExcel(df):
         try:
             # df.to_excel(r"../tsetmc/df_ektiar.xlsx") macOS
-            
-            df.to_excel(r"E:\code\data_vizi\tsetmc_dash\tsetmc\App\Data\df_ektiar.xlsx") # win
-            print(f"*---> {datetime.now()}: Data Save to excel successfully <---*")
+            # df.to_excel(r"E:\code\data_vizi\tsetmc_dash\tsetmc\App\Data\df_ektiar.xlsx") # win
+
+            directory = os.path.dirname(os.path.abspath(__file__))
+            file_path = os.path.join(directory, "..", "Data", "df_ektiar.xlsx")
+
+            df.to_excel(file_path)
+
+            print(
+                f"*---> {datetime.now()}: Data Save to excel successfully <---*")
         except Exception as e:
             print(f"no save Error!! Error Details: {e}")
 
@@ -131,13 +136,14 @@ class Database:
         data = Database.Getdata(url=url)
         if data:
             clean = Database.clean_dataframe(data)
-            clean_status = Database.clean_namd(clean)  # تغییر نام از clean_namdd به clean_status
-            clean_status = Database.split_buy_sell(clean_status)  # تغییر نام از clean_namdd به clean_status
-            clean_time = Database.apply_time(clean_status) 
+            # تغییر نام از clean_namdd به clean_status
+            clean_status = Database.clean_namd(clean)
+            # تغییر نام از clean_namdd به clean_status
+            clean_status = Database.split_buy_sell(clean_status)
+            clean_time = Database.apply_time(clean_status)
 
             if clean_status is not None:
                 Database.SaveToExcel(clean_time)
-
 
 
 # x = Getdata("https://old.tsetmc.com/tsev2/data/MarketWatchPlus.aspx")

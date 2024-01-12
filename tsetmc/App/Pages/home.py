@@ -9,10 +9,15 @@ from dash import Dash, dash_table
 from Services.datadb import Database
 import plotly.express as px
 from dash import html, dcc, callback, Input, Output
+import os
 
+# df = pd.read_excel(
+#     r"\\tsetmc\App\\Data\df_ektiar.xlsx")
 
-df = pd.read_excel(
-    r"E:\code\data_vizi\tsetmc_dash\tsetmc\app\Data\df_ektiar.xlsx")
+current_directory = os.path.dirname(os.path.abspath(__file__))
+file_path = os.path.join(current_directory, "..", "Data", "df_ektiar.xlsx")
+
+df = pd.read_excel(file_path)
 
 dash.register_page(__name__, path="/")
 
