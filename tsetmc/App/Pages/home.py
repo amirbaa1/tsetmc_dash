@@ -22,41 +22,11 @@ pie_div = html.Div(
             [
                 dcc.Graph(
                     id="graph",
-                    # style={
-                    #     "width": "80%",  # تنظیم عرض نمودار
-                    #     "height": "500px",
-                    #     "float": "right",  # تنظیم ارتفاع نمودار
-                    # },
                 ),
-                # html.P("status:"),
-                # dcc.Dropdown(
-                #     id="status",
-                #     options=[{"label": i, "value": i}
-                #              for i in df["وضعیت"].unique()],
-                #     value=df["وضعیت"].unique()[0],
-                #     clearable=False,
-                #     # style={
-                #     #     "width": "150px",  # تنظیم عرض Dropdown
-                #     #     "height": "30px",
-                #     #     "float": "right",
-                #     #     "margin-right": "20%",
-                #     # },
-                # ),
-                # dcc.Dropdown(
-                #     id="symbols",
-                #     options=[{'label': i, 'value': i}
-                #              for i in df['دسته'].unique()],
-                #     value=df['دسته'].unique()[0],
-                #     multi=True,
-                #     style={"width": "100%", "margin-bottom": "20px"},
-                # ),
             ],
-            # style={"height": "50vh"}
-            # style={"clear": "both"}
+
         ),
-        # class_name="shadow",
-        # style={"maxWidth": 500, "text-align": "center", }
-        # style={"maxWidth": 500, "margin": "auto"}
+
     )
 )
 
