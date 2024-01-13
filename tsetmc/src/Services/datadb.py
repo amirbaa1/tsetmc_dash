@@ -136,9 +136,7 @@ class Database:
         data = Database.Getdata(url=url)
         if data:
             clean = Database.clean_dataframe(data)
-            # تغییر نام از clean_namdd به clean_status
             clean_status = Database.clean_namd(clean)
-            # تغییر نام از clean_namdd به clean_status
             clean_status = Database.split_buy_sell(clean_status)
             clean_time = Database.apply_time(clean_status)
 
