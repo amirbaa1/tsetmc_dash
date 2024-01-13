@@ -6,7 +6,7 @@ app = dash.Dash(
     __name__,
     external_stylesheets=[dbc.themes.BOOTSTRAP],
     suppress_callback_exceptions=True,
-    pages_folder="pages",
+    pages_folder="pages/",
     use_pages=True
 )
 server = app.server
