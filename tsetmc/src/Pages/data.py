@@ -20,8 +20,6 @@ file_path = os.path.join(directory, "..", "Data", "df_ektiar.xlsx")
 
 df = pd.read_excel(file_path)
 
-# app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
-
 dash.register_page(__name__, path="/data",
                    external_stylesheets=[dbc.themes.BOOTSTRAP],)
 
