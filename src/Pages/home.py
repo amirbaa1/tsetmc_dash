@@ -173,9 +173,11 @@ home = dbc.Container(
 )
 
 
-layout = html.Div([
-    home
-])
+layout = html.Div([home, dcc.Interval(
+    id='interval-component',
+    interval=60 * 1000,  # میلی‌ثانیه
+    n_intervals=0
+),html.Div(id='table')])
 
 # pig namad and status and sum namad
 
@@ -309,3 +311,18 @@ def bar_chart(selected_symbols, selector):
         )
         fig.update_layout(xaxis={'categoryorder': 'total descending'})
         return fig
+
+
+# @callback(Output("table", "children"),
+#           Input("interval-component", "n_intervals")
+#           )
+# def refresh_table(n_intervals):
+#     print("Callback is running...")
+#     Database.Database_Tsetmc()
+#     directory = os.path.dirname(os.path.abspath(__file__))
+#     file_path = os.path.join(directory, "..", "Data", "df_ektiar.xlsx")
+
+#     df = pd.read_excel(file_path)
+
+#     # df = pd.read_excel(r"...\tsetmc\app\Data\df_ektiar.xlsx")
+#     return df.to_dict("records")
