@@ -175,7 +175,7 @@ home = dbc.Container(
 
 layout = html.Div([home, dcc.Interval(
     id='interval-component',
-    interval=60 * 1000,  # میلی‌ثانیه
+    interval=60 * 1000, 
     n_intervals=0
 ),html.Div(id='table')])
 

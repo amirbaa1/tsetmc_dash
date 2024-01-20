@@ -62,6 +62,15 @@ class Database:
             print(f"NO Data! , Error {e}")
 
     @staticmethod
+    def Clock_Date_namd(data):
+        col = ['ساعت معامله', 'تاریخ معامله']
+        try:
+            df_main = None # TODO: Colck namad 
+
+        except Exception as e:
+            print(f"NO Data! , Error {e}")
+
+    @staticmethod
     def clean_namd(df):
         df_split_values = df["نام نماد"].str.split("-")
         df["نام نماد"] = df_split_values.str[0]

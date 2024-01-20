@@ -49,7 +49,7 @@ table_div = dbc.Table(
 
 layout = html.Div([table_div, dcc.Interval(
     id='interval-component',
-    interval=60 * 1000,  # میلی‌ثانیه
+    interval=60 * 1000,
     n_intervals=0
 )])
 
