@@ -54,7 +54,7 @@ table_div = dbc.Table(
 layout = html.Div(
     [
         table_div,
-        dcc.Interval(id="interval-component", interval=5 * 1000, n_intervals=0),
+        dcc.Interval(id="interval-component", interval=30 * 1000, n_intervals=0),
     ]
 )
 

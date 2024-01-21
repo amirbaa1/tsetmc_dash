@@ -47,8 +47,8 @@ class Database:
             "قیمت مجاز کمترین",
             "تعداد سهام",
             "?",
-            "NAV ابطال",
-            "موقعیت های باز",
+            # "NAV ابطال",
+            # "موقعیت های باز",
         ]
         try:
             df_main = pd.DataFrame((data.split("@")[2]).split(";"))
@@ -56,6 +56,7 @@ class Database:
             print("---> clean code1 <---")
             for item in range(len(col)):
                 df_split.rename(columns={item: f"{col[item]}"}, inplace=True)
+            # df_split = df_split.drop(columns=["NAV ابطال","موقعیت های باز"],axis=0)
             print("---> clean code2 <---")
             return df_split
         except Exception as e:
@@ -93,13 +94,15 @@ class Database:
         df.insert(6, "مقدار", df.pop("مقدار"))
         df.insert(8, "تاریخ", df.pop("تاریخ"))
         print("---> clean namd <---")
-        df = df[df["نام نماد"].apply(lambda x: "اختيار" in x)].reset_index(drop=True)
+        df = df[df["نام نماد"].apply(
+            lambda x: "اختيار" in x)].reset_index(drop=True)
         print("---> split ektiar <---")
         return df
 
     @staticmethod
     def split_buy_sell(df):
-        df["وضعیت"] = np.where(df["نام نماد"].str.contains("اختيارخ"), "خرید", "فروش")
+        df["وضعیت"] = np.where(
+            df["نام نماد"].str.contains("اختيارخ"), "خرید", "فروش")
         df.insert(5, "وضعیت", df.pop("وضعیت"))
         print("---> split buy_sell <---")
 
@@ -142,51 +145,32 @@ class Database:
 
             directory = os.path.dirname(os.path.abspath(__file__))
             file_path = os.path.join(directory, "..", "Data", "df_ektiar.xlsx")
+            if not os.path.exists(file_path):
+                df.to_excel(os.path.join(directory, "..", "Data", "df_ektiar.xlsx"), index=False)
+                print(f"*---> {datetime.now()}: Data Save to excel successfully in file new <---*")
 
-            df_old = pd.read_excel(file_path)
-            df_old = df_old.drop(
-                columns=[
-                    "id",
-                    "id_info",
-                    "نماد",
-                    "?",
-                    "دسته",
-                    "نام نماد",
-                    "وضعیت",
-                    "اولین",
-                    "مقدار",
-                    "پایانی",
-                    "تاریخ",
-                    "معامله",
-                    "تعداد معاملات",
-                    "حجم معاملات",
-                    "ارزش معاملات",
-                    "کمترین بازه روز",
-                    "بیشترین بازه روز",
-                    "بازده دیروز",
-                    "EPS",
-                    "حجم مبنا",
-                    "?.1",
-                    "?.2",
-                    "کد گروه صنعت",
-                    "قیمت مجاز بیشترین",
-                    "قیمت مجاز کمترین",
-                    "تعداد سهام",
-                    "?.3",
-                    "ساعت معامله",
-                    "تاریخ معامله",
-                ]
-            )
-            df_new = pd.concat([df, df_old], axis=0)
-            df_new.reset_index().drop(columns=["index"])
+            else: 
+                df_old = pd.read_excel(file_path)
 
-            df_new.to_excel(file_path, index=False)
+                    # Print the data for debugging
+                    # print(df)
+                    # print("===")
+                    # print(df_old)
+                    # print("===")
 
-            print(f"*---> {datetime.now()}: Data Save to excel successfully <---*")
+                df.to_excel(os.path.join(directory, "..", "Data", "df_new.xlsx"), index=False)
+
+                df_new = pd.read_excel(os.path.join(directory, "..", "Data", "df_new.xlsx"))
+                df_concat = pd.concat([df_old, df_new],ignore_index=True)
+
+                df_concat.to_excel(file_path, index=False)
+
+
+                print(f"*---> {datetime.now()}: Data Save to excel successfully <---*")
         except Exception as e:
             print(f"no save Error!! Error Details: {e}")
-            print("old : ", df_old.columns)
-            print("new : ", df.columns)
+            print(f"old :{df_old.columns} ", len(df_old.columns))
+            print(f"new :{df.columns} ", len(df.columns))
 
     @staticmethod
     def Database_Tsetmc():
@@ -201,7 +185,7 @@ class Database:
 
             if clean_status is not None:
                 Database.SaveToExcel(clean_time)
-
+# Database.Database_Tsetmc()
 
 # x = Getdata("https://old.tsetmc.com/tsev2/data/MarketWatchPlus.aspx")
 # clean = clean_dataframe(x)
