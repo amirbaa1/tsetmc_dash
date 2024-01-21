@@ -62,13 +62,26 @@ class Database:
             print(f"NO Data! , Error {e}")
 
     @staticmethod
-    def Clock_Date_namd(data):
-        col = ['ساعت معامله', 'تاریخ معامله']
+    def Clock_Date_namd(data, df):
         try:
-            df_main = None # TODO: Colck namad 
+            df_main_clock = pd.DataFrame((data.split("@")[1]).split(","))
+            colok = df_main_clock.loc[0]
+            date_time_str = colok[0].strip()
+            if date_time_str:
+                date, time = date_time_str.split()
 
+                df["ساعت معامله"] = time
+                df["تاریخ معامله"] = date
+
+                print(f"---> Add Time and Date in namad : {time} <---")
+                # df.insert(8, "تاریخ معامله'", df.pop("تاریخ معامله'"))
+                # df.insert(9, "ساعت معامله'", df.pop("ساعت معامله'"))
+
+                return df
+            else:
+                print(f"NO Date and Time!")
         except Exception as e:
-            print(f"NO Data! , Error {e}")
+            print(f"NO Date and Time! , Error {e}")
 
     @staticmethod
     def clean_namd(df):
@@ -80,15 +93,13 @@ class Database:
         df.insert(6, "مقدار", df.pop("مقدار"))
         df.insert(8, "تاریخ", df.pop("تاریخ"))
         print("---> clean namd <---")
-        df = df[df["نام نماد"].apply(
-            lambda x: "اختيار" in x)].reset_index(drop=True)
+        df = df[df["نام نماد"].apply(lambda x: "اختيار" in x)].reset_index(drop=True)
         print("---> split ektiar <---")
         return df
 
     @staticmethod
     def split_buy_sell(df):
-        df["وضعیت"] = np.where(
-            df["نام نماد"].str.contains("اختيارخ"), 'خرید', 'فروش')
+        df["وضعیت"] = np.where(df["نام نماد"].str.contains("اختيارخ"), "خرید", "فروش")
         df.insert(5, "وضعیت", df.pop("وضعیت"))
         print("---> split buy_sell <---")
 
@@ -100,27 +111,27 @@ class Database:
     @staticmethod
     def clean_time(time):
         try:
-            if len(time) == 8 and '/' not in time:
+            if len(time) == 8 and "/" not in time:
                 year = int(time[:4])
                 month = int(time[4:6])
                 day = int(time[6:])
-                print('---> clean time <---')
+                print("---> clean time <---")
                 return f"{year}/{month:02d}/{day:02d}"
             else:
                 return time
         except Exception as e:
             print("Error clena_time : ", e)
 
-    # def clena_time2(time):
-    #     try:
-    #         time_split = time.split('/')
+        # def clena_time2(time):
+        #     try:
+        #         time_split = time.split('/')
 
         except Exception as e:
             print(e)
 
     @staticmethod
     def apply_time(df):
-        df['تاریخ'] = df['تاریخ'].apply(lambda time: Database.clean_time(time))
+        df["تاریخ"] = df["تاریخ"].apply(lambda time: Database.clean_time(time))
         return df
 
     @staticmethod
@@ -132,12 +143,50 @@ class Database:
             directory = os.path.dirname(os.path.abspath(__file__))
             file_path = os.path.join(directory, "..", "Data", "df_ektiar.xlsx")
 
-            df.to_excel(file_path)
+            df_old = pd.read_excel(file_path)
+            df_old = df_old.drop(
+                columns=[
+                    "id",
+                    "id_info",
+                    "نماد",
+                    "?",
+                    "دسته",
+                    "نام نماد",
+                    "وضعیت",
+                    "اولین",
+                    "مقدار",
+                    "پایانی",
+                    "تاریخ",
+                    "معامله",
+                    "تعداد معاملات",
+                    "حجم معاملات",
+                    "ارزش معاملات",
+                    "کمترین بازه روز",
+                    "بیشترین بازه روز",
+                    "بازده دیروز",
+                    "EPS",
+                    "حجم مبنا",
+                    "?.1",
+                    "?.2",
+                    "کد گروه صنعت",
+                    "قیمت مجاز بیشترین",
+                    "قیمت مجاز کمترین",
+                    "تعداد سهام",
+                    "?.3",
+                    "ساعت معامله",
+                    "تاریخ معامله",
+                ]
+            )
+            df_new = pd.concat([df, df_old], axis=0)
+            df_new.reset_index().drop(columns=["index"])
 
-            print(
-                f"*---> {datetime.now()}: Data Save to excel successfully <---*")
+            df_new.to_excel(file_path, index=False)
+
+            print(f"*---> {datetime.now()}: Data Save to excel successfully <---*")
         except Exception as e:
             print(f"no save Error!! Error Details: {e}")
+            print("old : ", df_old.columns)
+            print("new : ", df.columns)
 
     @staticmethod
     def Database_Tsetmc():
@@ -145,7 +194,8 @@ class Database:
         data = Database.Getdata(url=url)
         if data:
             clean = Database.clean_dataframe(data)
-            clean_status = Database.clean_namd(clean)
+            add_time_date = Database.Clock_Date_namd(data, clean)
+            clean_status = Database.clean_namd(add_time_date)
             clean_status = Database.split_buy_sell(clean_status)
             clean_time = Database.apply_time(clean_status)
 

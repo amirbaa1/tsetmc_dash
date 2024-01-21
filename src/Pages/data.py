@@ -5,6 +5,7 @@ import dash_html_components as html
 from dash.dependencies import Input, Output
 import dash_bootstrap_components as dbc
 from dash import Dash, dash_table
+
 # from datadb import Database
 from Services.datadb import Database
 import plotly.express as px
@@ -21,8 +22,11 @@ file_path = os.path.join(directory, "..", "Data", "df_ektiar.xlsx")
 
 df = pd.read_excel(file_path)
 
-dash.register_page(__name__, path="/data",
-                   external_stylesheets=[dbc.themes.BOOTSTRAP],)
+dash.register_page(
+    __name__,
+    path="/data",
+    external_stylesheets=[dbc.themes.BOOTSTRAP],
+)
 
 table_div = dbc.Table(
     [
@@ -47,11 +51,12 @@ table_div = dbc.Table(
 )
 
 
-layout = html.Div([table_div, dcc.Interval(
-    id='interval-component',
-    interval=60 * 1000,
-    n_intervals=0
-)])
+layout = html.Div(
+    [
+        table_div,
+        dcc.Interval(id="interval-component", interval=5 * 1000, n_intervals=0),
+    ]
+)
 
 # refresh
 # @callback(Output("table", "data"),
@@ -71,11 +76,8 @@ layout = html.Div([table_div, dcc.Interval(
 #     return df.to_dict("records")
 
 
-@callback(Output("table", "data"),
-          Input("interval-component", "n_intervals")
-          )
+@callback(Output("table", "data"), Input("interval-component", "n_intervals"))
 def refresh_table(n_intervals):
-
     Database.Database_Tsetmc()
     directory = os.path.dirname(os.path.abspath(__file__))
     file_path = os.path.join(directory, "..", "Data", "df_ektiar.xlsx")
