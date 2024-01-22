@@ -19,6 +19,13 @@ file_path = os.path.join(current_directory, "..", "Data", "df_ektiar.xlsx")
 
 df = pd.read_excel(file_path)
 
+df["ساعت معامله"] = pd.to_datetime(
+    df["ساعت معامله"], format="%H:%M:%S").dt.time
+time_values = df["ساعت معامله"].unique()
+tooltip_settings = {"placement": "bottom", "always_visible": True}
+sorted_time_values = sorted(time_values)
+
+
 dash.register_page(__name__, path="/")
 
 pie_div = html.Div(
@@ -73,6 +80,23 @@ bar_fig = dbc.Card(
     )
 )
 
+line_fig = dbc.Card(
+    dbc.CardBody(
+        dcc.Graph(
+            id="line_fig",
+        )
+    )
+)
+secat_fig = dbc.Card(
+    dbc.CardBody(
+        dcc.Graph(
+            id="secat_fig",
+        )
+    )
+)
+
+mark_clock = {i: f'{i}' for i in df["ساعت معامله"]}
+
 
 def namad_high_dropdown(df):
     sum_df = df.groupby('دسته')['مقدار'].sum().reset_index()
@@ -109,6 +133,20 @@ sidebar = html.Div(
             value='معامله',
             style={"width": "100%", "margin-bottom": "20px"},
         ),
+        dbc.Row([
+            html.Div([
+                dcc.RangeSlider(
+                    id="time-slider",
+                    min=0,
+                    max=len(sorted_time_values) - 1,
+                    marks={i: str(sorted_time_values[i].strftime("%H:%M"))
+                           for i in range(len(sorted_time_values))},
+                    value=[0, len(sorted_time_values) - 1],
+                    tooltip=tooltip_settings,
+                    step=1
+                ),
+            ]),
+        ]),
 
         dbc.Row(
             [
@@ -119,7 +157,7 @@ sidebar = html.Div(
                 ])
             ],
             style={"height": "45vh", 'margin': '8px'}
-        )
+        ),
 
     ]
 )
@@ -155,7 +193,29 @@ content = html.Div(
                 )
             ],
             style={"height": "50vh", 'margin': '8px'}
-        )
+        ),
+        # dbc.Row(
+        #     [
+        #         dbc.Col(
+        #             [
+        #                 line_fig
+        #             ],
+        #             className='bg-light'
+        #         )
+        #     ],
+        #     style={"height": "50vh", 'margin': '8px'}
+        # ),
+        # dbc.Row(
+        #     [
+        #         dbc.Col(
+        #             [
+        #                 secat_fig
+        #             ],
+        #             className='bg-light'
+        #         )
+        #     ],
+        #     style={"height": "50vh", 'margin': '8px'}
+        # )
     ]
 )
 
@@ -174,10 +234,18 @@ home = dbc.Container(
 
 
 layout = html.Div([home, dcc.Interval(
-    id='interval-component',
-    interval=60 * 1000, 
-    n_intervals=0
-),html.Div(id='table')])
+    # id='interval-component',
+    # interval=120 * 1000,
+    # n_intervals=0
+), html.Div(id='table')])
+
+
+def filter_data_by_hour(df, selected_hour_range):
+    start_index, end_index = selected_hour_range
+    start_hour = sorted_time_values[start_index].strftime("%H:%M")
+    end_hour = sorted_time_values[end_index].strftime("%H:%M")
+
+    return df[df["ساعت معامله"].apply(lambda x: start_hour <= x.strftime("%H:%M") <= end_hour)]
 
 # pig namad and status and sum namad
 
@@ -212,13 +280,13 @@ def update_pie_chart(selected_status, selected_symbols):
 @callback(
     Output("pie_fig_2", "figure"),
     [Input("symbols", "value"),
-     Input("selector", "value")]
+     Input("selector", "value"), Input("time-slider", "value")]
 )
-def generate_pie_2_chart(selected_symbols, selector):
+def generate_pie_2_chart(selected_symbols, selector, selected_hour_range):
     if not isinstance(selected_symbols, list):
         selected_symbols = [selected_symbols]
-
-    bar_df = df[(df["دسته"].isin(selected_symbols))]
+    filtered_df = filter_data_by_hour(df, selected_hour_range)
+    bar_df = filtered_df[(filtered_df["دسته"].isin(selected_symbols))]
     # grouped_df_sum = bar_df.groupby(['وضعیت', 'دسته']).agg(
     #     {"مقدار": "sum"}).reset_index()
 
@@ -256,10 +324,15 @@ def generate_pie_2_chart(selected_symbols, selector):
 
 @callback(
     Output('graph_pie_buy_sell', 'figure'),
-    Input('graph_pie_buy_sell', 'id')
+    [Input('graph_pie_buy_sell', 'id'),
+     Input("time-slider", "value")]
 )
-def generate_chart_buy_sell(id):
-    count_values = df['وضعیت'].value_counts()
+def generate_chart_buy_sell(id, selected_time_range):
+    count_values = filter_data_by_hour(df, selected_time_range)[
+        'وضعیت'].value_counts()
+    print("Selected Time Range:", selected_time_range)
+
+    # count_values = df['وضعیت'].value_counts()
     buy_count = count_values.get('خرید', 0)
     sell_count = count_values.get('فروش', 0)
 
@@ -279,13 +352,19 @@ def generate_chart_buy_sell(id):
 @callback(
     Output("bar_fig", "figure"),
     [Input("symbols", "value"),
-     Input("selector", "value")]
+     Input("selector", "value"),
+     Input("time-slider", "value")]
 )
-def bar_chart(selected_symbols, selector):
+def bar_chart(selected_symbols, selector, selected_hour_range):
     if not isinstance(selected_symbols, list):
         selected_symbols = [selected_symbols]
 
-    bar_df = df[(df["دسته"].isin(selected_symbols))]
+    print("Selected Hour:", selected_hour_range)
+
+    filtered_df = filter_data_by_hour(df, selected_hour_range)
+    print("Filtered Data Length:", len(filtered_df))
+
+    bar_df = filtered_df[(filtered_df["دسته"].isin(selected_symbols))]
     grouped_df_sum = bar_df.groupby(['وضعیت', 'دسته']).agg(
         {"مقدار": "sum"}).reset_index()
 
@@ -312,6 +391,84 @@ def bar_chart(selected_symbols, selector):
         fig.update_layout(xaxis={'categoryorder': 'total descending'})
         return fig
 
+
+@callback(
+    Output("line_fig", "figure"),
+    [Input("symbols", "value"),
+     Input("selector", "value"),
+     Input("time-slider", "value")]
+)
+def line_chart(selected_symbols, selector, selected_hour_range):
+    if not isinstance(selected_symbols, list):
+        selected_symbols = [selected_symbols]
+
+    print("Selected Hour:", selected_hour_range)
+
+    filtered_df = filter_data_by_hour(df, selected_hour_range)
+
+    print("Filtered Data Length:", len(filtered_df))
+
+    bar_df = filtered_df[(filtered_df["دسته"].isin(selected_symbols))]
+
+    if selector == 'مقدار':
+        fig = px.line(data_frame=bar_df, x='ساعت معامله',
+                      y="مقدار", color="دسته")
+        fig.update_layout(
+            title='وضعیت مقدار نماد ها به شکل خطی',
+            title_font=dict(size=20)
+        )
+        fig.update_layout(xaxis={'categoryorder': 'total descending'})
+        return fig
+
+    elif selector == 'معامله':
+        fig = px.line(data_frame=bar_df, x='ساعت معامله',
+                      y="معامله", color="دسته")
+
+        fig.update_layout(
+            title='وضعیت معامله نماد ها به شکل خطی',
+            title_font=dict(size=20)
+        )
+        fig.update_layout(xaxis={'categoryorder': 'total descending'})
+        return fig
+
+
+@callback(
+    Output("secat_fig", "figure"),
+    [Input("symbols", "value"),
+     Input("selector", "value"),
+     Input("time-slider", "value")]
+)
+def scatter_chart(selected_symbols, selector, selected_hour_range):
+    if not isinstance(selected_symbols, list):
+        selected_symbols = [selected_symbols]
+
+    print("Selected Hour:", selected_hour_range)
+
+    filtered_df = filter_data_by_hour(df, selected_hour_range)
+
+    print("Filtered Data Length:", len(filtered_df))
+
+    bar_df = filtered_df[(filtered_df["دسته"].isin(selected_symbols))]
+
+    if selector == 'مقدار':
+        fig = px.scatter(bar_df, x='ساعت معامله', y="مقدار",
+                         color="دسته", size="مقدار")
+        fig.update_layout(
+            title='وضعیت مقدار نماد ها به شکل پراکندگی',
+            title_font=dict(size=20)
+        )
+        fig.update_layout(xaxis={'categoryorder': 'total descending'})
+        return fig
+
+    elif selector == 'معامله':
+        fig = px.scatter(bar_df, x='ساعت معامله', y="معامله",
+                         color="دسته", size="معامله")
+        fig.update_layout(
+            title='وضعیت معامله نماد ها به شکل پراکندگی',
+            title_font=dict(size=20)
+        )
+        fig.update_layout(xaxis={'categoryorder': 'total descending'})
+        return fig
 
 # @callback(Output("table", "children"),
 #           Input("interval-component", "n_intervals")

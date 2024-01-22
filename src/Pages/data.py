@@ -36,7 +36,7 @@ table_div = dbc.Table(
         html.Div(id="log-output"),
         dash_table.DataTable(
             id="table",
-            columns=[{"name": i, "id": i} for i in df.columns],
+            columns=[{"name": str(i), "id": str(i)} for i in df.columns],
             data=df.to_dict("records"),
             page_size=36,
             style_data={
@@ -54,7 +54,8 @@ table_div = dbc.Table(
 layout = html.Div(
     [
         table_div,
-        dcc.Interval(id="interval-component", interval=30 * 1000, n_intervals=0),
+        dcc.Interval(id="interval-component",
+                     interval=35 * 1000, n_intervals=0),
     ]
 )
 
@@ -76,7 +77,8 @@ layout = html.Div(
 #     return df.to_dict("records")
 
 
-@callback(Output("table", "data"), Input("interval-component", "n_intervals"))
+@callback(Output("table", "data"),
+          Input("interval-component", "n_intervals"))
 def refresh_table(n_intervals):
     Database.Database_Tsetmc()
     directory = os.path.dirname(os.path.abspath(__file__))
