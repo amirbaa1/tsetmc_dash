@@ -135,6 +135,7 @@ sidebar = html.Div(
         ),
         dbc.Row([
             html.Div([
+                html.P('ساعت معامله', className='font-weight-bold'),
                 dcc.RangeSlider(
                     id="time-slider",
                     min=0,
@@ -151,8 +152,6 @@ sidebar = html.Div(
         dbc.Row(
             [
                 html.Div([
-                    html.P('Target Variables',
-                           className='font-weight-bold'),
                     pie_div_buy_sell
                 ])
             ],
@@ -194,28 +193,28 @@ content = html.Div(
             ],
             style={"height": "50vh", 'margin': '8px'}
         ),
-        # dbc.Row(
-        #     [
-        #         dbc.Col(
-        #             [
-        #                 line_fig
-        #             ],
-        #             className='bg-light'
-        #         )
-        #     ],
-        #     style={"height": "50vh", 'margin': '8px'}
-        # ),
-        # dbc.Row(
-        #     [
-        #         dbc.Col(
-        #             [
-        #                 secat_fig
-        #             ],
-        #             className='bg-light'
-        #         )
-        #     ],
-        #     style={"height": "50vh", 'margin': '8px'}
-        # )
+        dbc.Row(
+            [
+                dbc.Col(
+                    [
+                        line_fig
+                    ],
+                    className='bg-light'
+                )
+            ],
+            style={"height": "50vh", 'margin': '8px'}
+        ),
+        dbc.Row(
+            [
+                dbc.Col(
+                    [
+                        secat_fig
+                    ],
+                    className='bg-light'
+                )
+            ],
+            style={"height": "50vh", 'margin': '8px'}
+        )
     ]
 )
 
